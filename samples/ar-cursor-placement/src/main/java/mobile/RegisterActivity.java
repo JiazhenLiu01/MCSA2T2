@@ -1,4 +1,4 @@
-package mobile.ui.login_signup;
+package mobile;
 
 import android.os.AsyncTask;
 import android.os.Bundle;

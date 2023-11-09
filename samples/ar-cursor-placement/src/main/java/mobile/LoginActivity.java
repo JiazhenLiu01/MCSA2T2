@@ -1,4 +1,4 @@
-package mobile.ui.login_signup;
+package mobile;
 
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -76,7 +76,8 @@ public class LoginActivity extends AppCompatActivity {
         signUpTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Handle sign-up navigation or logic here
+                Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
+                startActivity(intent);
             }
         });
 
@@ -166,7 +167,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private void requestModel(String email, String password) {
         // Instantiate the RequestQueue.
-        RequestQueue queue = Volley.newRequestQueue(this);
+        RequestQueue queue = Volley.newRequestQueue(LoginActivity.this);
         String url = "https://mobiles-2a62216dada4.herokuapp.com/user/login";
 
         StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
