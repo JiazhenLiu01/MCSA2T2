@@ -36,7 +36,7 @@ public class ImageListAdapter extends RecyclerView.Adapter<ImageListAdapter.View
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         ListData item = imageList.get(position);
 
-        holder.imageView.setImageResource(item.getImageResId());
+        holder.imageView.setImageBitmap(item.getImagebit());
         holder.nameTextView.setText(item.getName());
     }
 

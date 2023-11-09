@@ -12,6 +12,7 @@ import android.widget.AdapterView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import android.content.Intent;
@@ -22,20 +23,27 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
 import io.github.sceneview.sample.arcursorplacement.Activity;
 import io.github.sceneview.sample.arcursorplacement.R;
 import io.github.sceneview.sample.arcursorplacement.databinding.FragmentHomeBinding;
+import mobile.MainActivity;
+import mobile.ui.SharedViewModel;
 
+import org.apache.tools.ant.Main;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Stack;
 
 
@@ -45,11 +53,15 @@ public class HomeFragment extends Fragment {
 
     ListAdapter listAdapter;
 
-    ArrayList<ListData> dataArrayList = new ArrayList<>();
-
     ListData listData;
 
+
     ArrayList<ListData> dataItems = new ArrayList<>();
+
+    SearchView searchView;
+
+
+    Boolean[] starlist= new Boolean[]{};
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -58,28 +70,68 @@ public class HomeFragment extends Fragment {
 
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
+
+
+        searchView = root.findViewById(R.id.search_view);
+
+
         ArrayList<ListData> dataArrayList = new ArrayList<>();
         int[] imageList = new int[]{R.drawable.bed, R.drawable.bed, R.drawable.bed};
-        String[] nameList = new String[]{"Bed", "Bed", "Bed"};
+        String[] nameList = new String[]{"Bed", "Chair", "Bed"};
         String[] sizeList = new String[]{"30*40*50", "30*40*50", "30*40*50"};
+        Boolean[] starList = new Boolean[]{false, false, true};
 
         for (int i = 0; i < imageList.length; i++) {
-            listData = new ListData(nameList[i], sizeList[i], imageList[i]);
+            listData = new ListData(nameList[i], sizeList[i], imageList[i],starList[i]);
             dataArrayList.add(listData);
         }
+
+//        dataItems = dataArrayList;
         listAdapter = new ListAdapter(requireContext(), dataArrayList);
         binding.listView.setAdapter(listAdapter);
+
+
+
+
+
+        makeRequest();
         binding.listView.setClickable(true);
 
         binding.listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             //            @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-//                Intent intent = new Intent(packageContext:MainActivity.this, DetailedActivity.class;
-//                startActivity(intent);
-                  //downloadFurnitureRequest(dataItem.get(i).address);
+
+                  downloadFurnitureRequest(dataItems.get(i).name);
+                  dataItems.get(i).setStar(true);
+                  ListAdapter adapter = new ListAdapter(requireContext(), dataItems);
+                    // assign the adapter to the recycler view
+                    binding.listView.setAdapter(adapter);
+
+                    String name =dataItems.get(i).name;
+                    Bitmap imge =dataItems.get(i).img;
+
+                    SharedViewModel sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+                    // Set the selected item
+                    sharedViewModel.addItem(name, imge);
+
+
+
             }
         });
-        makeRequest();
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                filterData(newText);
+                return true;
+            }
+        });
+
         // Inside your onCreateView method in HomeFragment
 //        binding.arscenebutton.setOnClickListener(new View.OnClickListener() {
 //            @Override
@@ -118,26 +170,27 @@ public class HomeFragment extends Fragment {
                         new Response.Listener<JSONArray>() {
                             @Override
                             public void onResponse(JSONArray response) {
+                                Log.e("requestTest", response.toString());
                                 try {
                                     dataItems = new ArrayList<>();
-
+                                    Log.e("requestTest", "before-pass");
                                     for (int i = 0; i < response.length(); i++) {
                                         JSONObject itemObj = response.getJSONObject(i);
                                         String name = itemObj.getString("name");
                                         String imgB64 = itemObj.getString("image");
-                                        String glbB64 = itemObj.getString("data");
+//                                        String glbB64 = itemObj.getString("data");
                                         String size = itemObj.getString("size");
                                         byte[] decodeImage = Base64.decode(imgB64, Base64.DEFAULT);
                                         Bitmap bitmap = BitmapFactory.decodeByteArray(decodeImage, 0, decodeImage.length);
-                                        byte[] glbData = Base64.decode(glbB64, Base64.DEFAULT);
+//                                        byte[] glbData = Base64.decode(glbB64, Base64.DEFAULT);
 
-                                        saveByteArrayToInternalStorage(glbData, name+".glb",bitmap, name+".png");
+                                         //saveByteArrayToInternalStorage(glbData, name+".glb",bitmap, name+".png");
 
 //                                        String stringdata =  readStorage();
 //                                        String first100Characters = stringdata.substring(stringdata.length() - 100);
 //                                        Log.e("requestTest", "stringdata"+first100Characters);
 
-                                        ListData modelItem = new ListData(name, bitmap,size);
+                                        ListData modelItem = new ListData(name, bitmap,size,false);
 //                                        ListData modelItem = new ListData(name,"2",0);
                                         dataItems.add(modelItem);
                                         Log.e("requestTest", "pass");
@@ -238,7 +291,65 @@ public class HomeFragment extends Fragment {
         }
     }
 
+    private void downloadFurnitureRequest(String name) {
+        // Instantiate the RequestQueue.
+        RequestQueue queue = Volley.newRequestQueue(requireContext());
+        String url = "https://mobiles-2a62216dada4.herokuapp.com/model/model";
 
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        // response
+                        Log.e("requestTest", "Model: " + response.toString().substring(0, Math.min(response.toString().length(), 50)));
+
+                        try {
+                            JSONObject jsonObject = new JSONObject(response);
+                            String model = jsonObject.getString("model");
+                            String image = jsonObject.getString("image");
+
+                            byte[] modelBytes = model.getBytes(StandardCharsets.UTF_8);
+                            byte[] imageBytes = Base64.decode(image, Base64.DEFAULT);
+
+                            Bitmap imageBitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+
+                            saveByteArrayToInternalStorage(modelBytes,name,imageBitmap,name);
+
+                        } catch (JSONException ex) {
+                            throw new RuntimeException(ex);
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.e("requestTest", "Error: " + error.getMessage());
+                        // deal with error response
+                    }
+                })  {
+            @Override
+            public byte[] getBody() {
+
+                JSONObject params = new JSONObject();
+                try {
+                    params.put("name", name);
+                    Log.e("requestTest", "message: " + params.toString().getBytes());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                return params.toString().getBytes();
+            }
+            @Override
+            public String getBodyContentType() {
+                return "application/json; charset=utf-8";
+            }
+
+        };
+
+        // add to queue
+        queue.add(stringRequest);
+    }
 
 //    private String readStorage() {
 //        String base64Data=null;
@@ -255,5 +366,18 @@ public class HomeFragment extends Fragment {
 //        }
 //        return base64Data;
 //    }
+    private void filterData(String searchText) {
+        ArrayList<ListData> dataitem2 = new ArrayList<>();
+
+        for (ListData item : dataItems) {
+            if (item.name.toLowerCase().contains(searchText.toLowerCase())) {
+                dataitem2.add(item);
+
+            }
+            dataItems = new ArrayList<>(dataitem2);
+            ListAdapter adapter = new ListAdapter(requireContext(), dataItems);
+            binding.listView.setAdapter(adapter);
+        }
+    }
 
 }

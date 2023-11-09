@@ -51,9 +51,15 @@
             android:textColor="@color/grey"/>
 
 
-
-
-
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/star"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="60dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/star"
+            app:shapeAppearanceOverlay="@style/roundedImage" />
 
 
     </RelativeLayout>
