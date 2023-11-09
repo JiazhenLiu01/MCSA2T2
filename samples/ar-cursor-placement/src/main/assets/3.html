@@ -66,6 +66,7 @@
 
         const layoutCentroid = layoutPositions.reduce((sum, pos) => sum.add(pos), new THREE.Vector3()).divideScalar(layoutPositions.length);
         console.log("layoutmesh loc",layoutPositions);
+        layoutCentroid.y -= 0.1;
         layoutPositions.forEach((item, index, arr) => {
             arr[index].sub(layoutCentroid);
         });
@@ -77,7 +78,7 @@
         layoutShape.lineTo(layoutPositions[0].x, layoutPositions[0].z);
         const layoutExtrudeSettings = {
             steps: 1,
-            depth: 0.05,
+            depth: 0.10,
             bevelEnabled: false
         };
         const layoutGeometry = new THREE.ExtrudeGeometry(layoutShape, layoutExtrudeSettings);

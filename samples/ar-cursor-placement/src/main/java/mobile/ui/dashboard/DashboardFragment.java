@@ -4,6 +4,7 @@ package mobile.ui.dashboard;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -31,9 +32,11 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import io.github.sceneview.sample.arcursorplacement.R;
+import io.github.sceneview.sample.arcursorplacement.ViewActivity;
 import io.github.sceneview.sample.arcursorplacement.databinding.FragmentDashboardBinding;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.Projection;
@@ -190,7 +193,21 @@ public class DashboardFragment extends Fragment implements
 
             }
         });
-
+        locationClient.getLastLocation()
+                .addOnSuccessListener(location -> {
+                    if (location != null) {
+                        // Move the camera to the current location of the user
+                        map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 18));
+                    } else {
+                        // Handle the situation where location is null (e.g. location services turned off)
+                        Toast.makeText(requireContext(), "Location not available", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    // Handle the failure to get location
+                    Log.e("DashboardFragment", "Error trying to get last GPS location", e);
+                    Toast.makeText(requireContext(), "Error getting location", Toast.LENGTH_SHORT).show();
+                });
 
     }
 
@@ -237,6 +254,11 @@ public class DashboardFragment extends Fragment implements
             //            @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 requestModel(dataItem.get(i).address);
+                if (model != null ){
+                    Intent intent = new Intent(requireContext(), ViewActivity.class);
+                    intent.putExtra("EXTRA_ID", model);
+                    startActivity(intent);
+                }
 //                Intent intent = new Intent(packageContext:MainActivity.this, DetailedActivity.class;
 //                startActivity(intent);
             } });
@@ -430,8 +452,8 @@ public class DashboardFragment extends Fragment implements
 
                         try {
                             JSONObject jsonObject = new JSONObject(response);
-                            model = jsonObject.getString("model");
-
+                            model = jsonObject.getString("id");
+                            Log.e("requestTest", "Model: " + model);
                         } catch (JSONException ex) {
                             throw new RuntimeException(ex);
                         }

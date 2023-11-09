@@ -98,8 +98,8 @@
     <androidx.recyclerview.widget.RecyclerView
 
         android:id="@+id/modelsRV"
-        android:layout_width="86dp"
-        android:layout_height="648dp"
+        android:layout_width="93dp"
+        android:layout_height="620dp"
         android:scrollbars="vertical"
         android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
