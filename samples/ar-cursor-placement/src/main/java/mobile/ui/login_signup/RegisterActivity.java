@@ -1,5 +1,6 @@
 package mobile.ui.login_signup;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -21,6 +22,7 @@ import org.json.JSONObject;
 import java.io.UnsupportedEncodingException;
 
 import io.github.sceneview.sample.arcursorplacement.R;
+import mobile.MainActivity;
 
 public class RegisterActivity extends AppCompatActivity {
     String email;
@@ -92,11 +94,10 @@ public class RegisterActivity extends AppCompatActivity {
             paramsObject.put("email", email);
             paramsObject.put("password", password);
             paramsObject.put("name", name);
-            params = paramsObject.toString();
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
+        params = paramsObject.toString();
         SignUpTask task = new SignUpTask();
         task.execute();
     }
@@ -104,25 +105,44 @@ public class RegisterActivity extends AppCompatActivity {
     private class SignUpTask extends AsyncTask<Void, Void, Void> {
         @Override
         protected Void doInBackground(Void... voids) {
-            requestRegistration(params);
+            requestRegistration(email,password,name);
             return null;
         }
     }
 
-    private void requestRegistration(String data) {
+    private void requestRegistration(String email, String password, String name) {
         RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
         String url = "https://mobiles-2a62216dada4.herokuapp.com/user/register"; // Replace with your actual backend URL
 
         StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
                 new Response.Listener<String>() {
+//                    @Override
+//                    public void onResponse(String response) {
+//                        Log.e("requestTest", "Registration Response: " + response);
+//
+//                        // Handle the registration response as needed
+//                        progressBar.setVisibility(View.INVISIBLE);
+//                        Toast.makeText(RegisterActivity.this, "Registration Successful", Toast.LENGTH_SHORT).show();
+//                        finish(); // Close the SignUpActivity after successful registration
+//                    }
+//                },
                     @Override
                     public void onResponse(String response) {
-                        Log.e("requestTest", "Registration Response: " + response);
+                        // response
 
-                        // Handle the registration response as needed
-                        progressBar.setVisibility(View.INVISIBLE);
-                        Toast.makeText(RegisterActivity.this, "Registration Successful", Toast.LENGTH_SHORT).show();
-                        finish(); // Close the SignUpActivity after successful registration
+
+                        try {
+                            JSONObject jsonObject = new JSONObject(response);
+                            String login = jsonObject.getString("login");
+                            String password= jsonObject.getString("password");
+                            String username= jsonObject.getString("username");
+
+                            Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
+                            startActivity(intent);
+
+                        } catch (JSONException ex) {
+                            throw new RuntimeException(ex);
+                        }
                     }
                 },
                 new Response.ErrorListener() {
@@ -134,23 +154,49 @@ public class RegisterActivity extends AppCompatActivity {
                         Toast.makeText(RegisterActivity.this, "Registration Error", Toast.LENGTH_SHORT).show();
                     }
                 }) {
-            @Override
-            public byte[] getBody() {
-                try {
-                    return data.getBytes("utf-8");
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                    return null;
-                }
+//            @Override
+//            public byte[] getBody() {
+//                try {
+//                    return params.getBytes("utf-8");
+//                } catch (UnsupportedEncodingException e) {
+//                    e.printStackTrace();
+//                    return null;
+//                }
+//            }
+//
+//            @Override
+//            public String getBodyContentType() {
+//                return "application/json; charset=utf-8";
+//            }
+//        };
+//
+//        queue.add(stringRequest);
+//    }
+//}
+        @Override
+        public byte[] getBody() {
+
+            JSONObject params = new JSONObject();
+            try {
+                params.put("email", email);
+                params.put("password", password);
+                params.put("name", name);
+                Log.e("requestTest", "message: " + params);
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
 
-            @Override
-            public String getBodyContentType() {
-                return "application/json; charset=utf-8";
-            }
-        };
+            return params.toString().getBytes();
+        }
+                    @Override
+                    public String getBodyContentType() {
+                        return "application/json; charset=utf-8";
+                    }
 
-        queue.add(stringRequest);
-    }
-}
+                };
+
+                // add to queue
+                queue.add(stringRequest);
+            }
+        }
 

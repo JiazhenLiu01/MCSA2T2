@@ -178,8 +178,8 @@ public class LoginActivity extends AppCompatActivity {
 
                         try {
                             JSONObject jsonObject = new JSONObject(response);
-                           String login = jsonObject.getString("login");
-                           String username= jsonObject.getString("username");
+                            String login = jsonObject.getString("login");
+                            String username= jsonObject.getString("username");
 
                             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                             startActivity(intent);
