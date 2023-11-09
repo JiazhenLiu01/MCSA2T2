@@ -60,8 +60,12 @@ public class HomeFragment extends Fragment {
 
     SearchView searchView;
 
+    ArrayList<ListData> nameStar = new ArrayList<>();
+
 
     Boolean[] starlist= new Boolean[]{};
+
+    Boolean firstGet = true;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -193,6 +197,12 @@ public class HomeFragment extends Fragment {
                                         ListData modelItem = new ListData(name, bitmap,size,false);
 //                                        ListData modelItem = new ListData(name,"2",0);
                                         dataItems.add(modelItem);
+                                        if (firstGet) {
+                                            nameStar.add(modelItem);
+                                            firstGet=false;
+                                        }else{
+                                            dataItems.get(i).star=nameStar.get(i).star;
+                                        }
                                         Log.e("requestTest", "pass");
                                     }
                                     Log.e("requestTest", String.valueOf(response.length()));
