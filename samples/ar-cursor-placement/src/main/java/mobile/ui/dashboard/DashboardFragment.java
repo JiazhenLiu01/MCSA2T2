@@ -171,7 +171,7 @@ public class DashboardFragment extends Fragment implements
                 public void onSuccess(Location location) {
                     if (location != null) {
                         LatLng currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
-
+                        Log.e("requestTest", "Location: " + currentLocation.toString());
                         // send Coordinates to server
                         sendCoordinates(currentLocation);}}  });
         }

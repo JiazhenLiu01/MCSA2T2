@@ -622,12 +622,13 @@ class MainFragment : Fragment(R.layout.fragment_main), OnModelClickListener {
         try {
             val modelsFolder = File(context.filesDir, "models")
             val imagesFolder = File(context.filesDir, "images")
-
+            Log.e("modelsDirectory1", modelsFolder.toString())
             if (modelsFolder.exists() && modelsFolder.isDirectory) {
                 val modelFiles = modelsFolder.listFiles { _, name -> name.endsWith(".glb") }
-
+                Log.e("modelsDirectory1", modelFiles.toString())
                 modelFiles?.forEach { modelFile ->
                     val displayName = modelFile.name.substringBeforeLast(".glb")
+                    Log.e("modelsDirectory1", displayName)
                     val imageFile = File(
                         imagesFolder,
                         "${displayName}.png"

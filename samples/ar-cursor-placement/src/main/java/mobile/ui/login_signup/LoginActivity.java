@@ -36,6 +36,10 @@ public class LoginActivity extends AppCompatActivity {
     private EditText passwordEditText;
     private Button loginButton;
     private TextView signUpTextView;
+
+    String email;
+
+    String password;
     private TextView forgotPasswordTextView;
     private ProgressDialog mDialog; // Add this line for ProgressDialog
 
@@ -50,13 +54,12 @@ public class LoginActivity extends AppCompatActivity {
         passwordEditText = findViewById(R.id.edit_senha);
         loginButton = findViewById(R.id.bt_entrar);
         signUpTextView = findViewById(R.id.bt_signup);
-//        forgotPasswordTextView = findViewById(R.id.textViewForgotPassword);
 
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String email = emailEditText.getText().toString();
-                String password = passwordEditText.getText().toString();
+                email = emailEditText.getText().toString();
+                password = passwordEditText.getText().toString();
 
                 // Check if email and password are valid
                 if (isValid(email, password)) {
@@ -74,12 +77,7 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-        forgotPasswordTextView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Handle forgot password logic here
-            }
-        });
+
     }
 
     private boolean isValid(String email, String password) {
@@ -114,14 +112,58 @@ public class LoginActivity extends AppCompatActivity {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            requestModel(params);
+            requestModel(email,password);
             return null;
         }
     }
 
-    private void requestModel(String address) {
+//    private void requestModel(String address) {
+//        // Instantiate the RequestQueue.
+//        RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
+//        String url = "https://mobiles-2a62216dada4.herokuapp.com/user/login";
+//
+//        StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
+//                new Response.Listener<String>() {
+//                    @Override
+//                    public void onResponse(String response) {
+//                        // response
+//                        Log.e("requestTest", "Model: " + response.substring(0, Math.min(response.length(), 50)));
+//
+//                        try {
+//                            JSONObject jsonObject = new JSONObject(response);
+////                            String model = jsonObject.getString("model");
+//                            Log.e("requestTest", "Model: " + jsonObject.toString());
+//                            // Handle the model response as needed
+//                        } catch (JSONException ex) {
+//                            throw new RuntimeException(ex);
+//                        }
+//                    }
+//                },
+//                new Response.ErrorListener() {
+//                    @Override
+//                    public void onErrorResponse(VolleyError error) {
+//                        Log.e("requestTest", "Error: " + error.getMessage());
+//                        // deal with error response
+//                    }
+//                }) {
+//            @Override
+//            public byte[] getBody() {
+//                return params.getBytes();
+//            }
+//
+//            @Override
+//            public String getBodyContentType() {
+//                return "application/json; charset=utf-8";
+//            }
+//        };
+//
+//        // add to queue
+//        queue.add(stringRequest);
+//    }
+
+    private void requestModel(String email, String password) {
         // Instantiate the RequestQueue.
-        RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
+        RequestQueue queue = Volley.newRequestQueue(this);
         String url = "https://mobiles-2a62216dada4.herokuapp.com/user/login";
 
         StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
@@ -129,13 +171,15 @@ public class LoginActivity extends AppCompatActivity {
                     @Override
                     public void onResponse(String response) {
                         // response
-                        Log.e("requestTest", "Model: " + response.substring(0, Math.min(response.length(), 50)));
+
 
                         try {
                             JSONObject jsonObject = new JSONObject(response);
-                            String model = jsonObject.getString("model");
+                           String login = jsonObject.getString("login");
+                           String username= jsonObject.getString("username");
 
-                            // Handle the model response as needed
+                            Log.e("requestTest", "login: " + login+"username"+username);
+
                         } catch (JSONException ex) {
                             throw new RuntimeException(ex);
                         }
@@ -147,16 +191,26 @@ public class LoginActivity extends AppCompatActivity {
                         Log.e("requestTest", "Error: " + error.getMessage());
                         // deal with error response
                     }
-                }) {
+                })  {
             @Override
             public byte[] getBody() {
-                return params.getBytes();
-            }
 
+                JSONObject params = new JSONObject();
+                try {
+                    params.put("email", email);
+                    params.put("password", password);
+                    Log.e("requestTest", "message: " + params);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                return params.toString().getBytes();
+            }
             @Override
             public String getBodyContentType() {
                 return "application/json; charset=utf-8";
             }
+
         };
 
         // add to queue
