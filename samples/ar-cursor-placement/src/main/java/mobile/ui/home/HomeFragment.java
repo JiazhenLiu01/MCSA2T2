@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -62,10 +63,11 @@ public class HomeFragment extends Fragment {
 
     ArrayList<ListData> nameStar = new ArrayList<>();
 
+    ImageView filterImageView;
 
-    Boolean[] starlist= new Boolean[]{};
 
-    Boolean firstGet = true;
+
+    boolean firstGet = true;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -77,6 +79,8 @@ public class HomeFragment extends Fragment {
 
 
         searchView = root.findViewById(R.id.search_view);
+
+        filterImageView = root.findViewById(R.id.filter);
 
 
         ArrayList<ListData> dataArrayList = new ArrayList<>();
@@ -367,28 +371,33 @@ public class HomeFragment extends Fragment {
     private String readStorage() {
         String base64Data=null;
         try {
-            File file = new File(requireContext().getFilesDir(), "creeper.glb"); // 用你的文件名替换 "your_file.glb"
+            File file = new File(requireContext().getFilesDir(), "creeper.glb");
             FileInputStream fis = new FileInputStream(file);
             byte[] data = new byte[(int) file.length()];
             fis.read(data);
             fis.close();
             base64Data= Base64.encodeToString(data, Base64.DEFAULT);
-            // 此时，data 变量包含了文件的内容
         } catch (IOException e) {
             e.printStackTrace();
         }
         return base64Data;
     }
     private void filterData(String searchText) {
-        ArrayList<ListData> dataitem2 = new ArrayList<>();
-
+        ArrayList<ListData> dataItem2 = new ArrayList<>();
+        if (searchText!=null)
+            filterImageView.setVisibility(View.VISIBLE);
         for (ListData item : dataItems) {
             if (item.name.toLowerCase().contains(searchText.toLowerCase())) {
-                dataitem2.add(item);
-
+                dataItem2.add(item);
             }
-            dataItems = new ArrayList<>(dataitem2);
-            ListAdapter adapter = new ListAdapter(requireContext(), dataItems);
+
+            for (ListData item2 : dataItem2) {
+                for(ListData item3 : nameStar){
+                    if(item2.name.equals(item3.name))
+                        item2.star=item3.star;
+                }
+            }
+            ListAdapter adapter = new ListAdapter(requireContext(), dataItem2);
             binding.listView.setAdapter(adapter);
         }
     }
