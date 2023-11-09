@@ -12,6 +12,7 @@ import android.widget.AdapterView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import android.content.Intent;
@@ -28,7 +29,10 @@ import com.android.volley.toolbox.Volley;
 import io.github.sceneview.sample.arcursorplacement.Activity;
 import io.github.sceneview.sample.arcursorplacement.R;
 import io.github.sceneview.sample.arcursorplacement.databinding.FragmentHomeBinding;
+import mobile.MainActivity;
+import mobile.ui.SharedViewModel;
 
+import org.apache.tools.ant.Main;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -51,7 +55,10 @@ public class HomeFragment extends Fragment {
 
     ListData listData;
 
+
     ArrayList<ListData> dataItems = new ArrayList<>();
+
+    SearchView searchView;
 
 
     Boolean[] starlist= new Boolean[]{};
@@ -65,12 +72,12 @@ public class HomeFragment extends Fragment {
         View root = binding.getRoot();
 
 
-
+        searchView = root.findViewById(R.id.search_view);
 
 
         ArrayList<ListData> dataArrayList = new ArrayList<>();
         int[] imageList = new int[]{R.drawable.bed, R.drawable.bed, R.drawable.bed};
-        String[] nameList = new String[]{"Bed", "Bed", "Bed"};
+        String[] nameList = new String[]{"Bed", "Chair", "Bed"};
         String[] sizeList = new String[]{"30*40*50", "30*40*50", "30*40*50"};
         Boolean[] starList = new Boolean[]{false, false, true};
 
@@ -78,6 +85,8 @@ public class HomeFragment extends Fragment {
             listData = new ListData(nameList[i], sizeList[i], imageList[i],starList[i]);
             dataArrayList.add(listData);
         }
+
+//        dataItems = dataArrayList;
         listAdapter = new ListAdapter(requireContext(), dataArrayList);
         binding.listView.setAdapter(listAdapter);
 
@@ -91,13 +100,35 @@ public class HomeFragment extends Fragment {
         binding.listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             //            @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-//                Intent intent = new Intent(packageContext:MainActivity.this, DetailedActivity.class;
-//                startActivity(intent);
+
                   downloadFurnitureRequest(dataItems.get(i).name);
                   dataItems.get(i).setStar(true);
                   ListAdapter adapter = new ListAdapter(requireContext(), dataItems);
                     // assign the adapter to the recycler view
                     binding.listView.setAdapter(adapter);
+
+                    String name =dataItems.get(i).name;
+                    Bitmap imge =dataItems.get(i).img;
+
+                    SharedViewModel sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+                    // Set the selected item
+                    sharedViewModel.addItem(name, imge);
+
+
+
+            }
+        });
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                filterData(newText);
+                return true;
             }
         });
 
@@ -139,18 +170,19 @@ public class HomeFragment extends Fragment {
                         new Response.Listener<JSONArray>() {
                             @Override
                             public void onResponse(JSONArray response) {
+                                Log.e("requestTest", response.toString());
                                 try {
                                     dataItems = new ArrayList<>();
-
+                                    Log.e("requestTest", "before-pass");
                                     for (int i = 0; i < response.length(); i++) {
                                         JSONObject itemObj = response.getJSONObject(i);
                                         String name = itemObj.getString("name");
                                         String imgB64 = itemObj.getString("image");
-                                        String glbB64 = itemObj.getString("data");
+//                                        String glbB64 = itemObj.getString("data");
                                         String size = itemObj.getString("size");
                                         byte[] decodeImage = Base64.decode(imgB64, Base64.DEFAULT);
                                         Bitmap bitmap = BitmapFactory.decodeByteArray(decodeImage, 0, decodeImage.length);
-                                        byte[] glbData = Base64.decode(glbB64, Base64.DEFAULT);
+//                                        byte[] glbData = Base64.decode(glbB64, Base64.DEFAULT);
 
                                          //saveByteArrayToInternalStorage(glbData, name+".glb",bitmap, name+".png");
 
@@ -274,7 +306,7 @@ public class HomeFragment extends Fragment {
                         try {
                             JSONObject jsonObject = new JSONObject(response);
                             String model = jsonObject.getString("model");
-                            String image = jsonObject.getString("model");
+                            String image = jsonObject.getString("image");
 
                             byte[] modelBytes = model.getBytes(StandardCharsets.UTF_8);
                             byte[] imageBytes = Base64.decode(image, Base64.DEFAULT);
@@ -334,5 +366,18 @@ public class HomeFragment extends Fragment {
 //        }
 //        return base64Data;
 //    }
+    private void filterData(String searchText) {
+        ArrayList<ListData> dataitem2 = new ArrayList<>();
+
+        for (ListData item : dataItems) {
+            if (item.name.toLowerCase().contains(searchText.toLowerCase())) {
+                dataitem2.add(item);
+
+            }
+            dataItems = new ArrayList<>(dataitem2);
+            ListAdapter adapter = new ListAdapter(requireContext(), dataItems);
+            binding.listView.setAdapter(adapter);
+        }
+    }
 
 }

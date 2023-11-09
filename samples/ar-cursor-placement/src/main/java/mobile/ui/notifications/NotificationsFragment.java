@@ -1,6 +1,8 @@
 package mobile.ui.notifications;
 
+import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +19,7 @@ import java.util.List;
 
 import io.github.sceneview.sample.arcursorplacement.R;
 import io.github.sceneview.sample.arcursorplacement.databinding.FragmentNotificationsBinding;
+import mobile.ui.SharedViewModel;
 import mobile.ui.notifications.ImageListAdapter;
 import mobile.ui.notifications.ListData;
 
@@ -32,7 +35,24 @@ public class NotificationsFragment extends Fragment {
         binding = FragmentNotificationsBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
+        ArrayList<mobile.ui.notifications.ListData> imageList = new ArrayList<>();
+//        imageList.add(new ListData(R.drawable.bed, "Bed"));
+//        imageList.add(new ListData(R.drawable.bed, "Bed"));
+//        imageList.add(new ListData(R.drawable.bed, "Bed"));
 
+        SharedViewModel sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+        // Observe the selected item
+        sharedViewModel.getItems().observe(getViewLifecycleOwner(), items -> {
+            if (items != null) {
+                for (Pair<String, Bitmap> item : items) { // Iterate through all items
+                    // Use the name and image as needed
+                    String name = item.first;
+                    Bitmap image = item.second;
+                    imageList.add(new ListData(image, name));
+
+                }
+            }
+        });
 
 
 //         RecyclerView horizontalImageList = root.findViewById(R.id.horizontal_image_list);
@@ -56,10 +76,7 @@ public class NotificationsFragment extends Fragment {
 
         RecyclerView horizontalImageList = root.findViewById(R.id.horizontal_image_list);
 
-        ArrayList<mobile.ui.notifications.ListData> imageList = new ArrayList<>();
-        imageList.add(new ListData(R.drawable.bed, "Bed"));
-        imageList.add(new ListData(R.drawable.bed, "Bed"));
-        imageList.add(new ListData(R.drawable.bed, "Bed"));
+
 
         ImageListAdapter adapter = new ImageListAdapter(imageList);
         horizontalImageList.setAdapter(adapter);
