@@ -1,5 +1,6 @@
 package mobile.ui.notifications;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Pair;
@@ -71,6 +72,7 @@ public class NotificationsFragment extends Fragment {
 
 
 
+
         RecyclerView horizontalImageList = root.findViewById(R.id.horizontal_image_list);
 
 
@@ -92,6 +94,18 @@ public class NotificationsFragment extends Fragment {
 //        ImageListAdapter listAdapter = new ImageListAdapter(requireContext(), dataArrayList);
 //        horizontalImageList.setAdapter(listAdapter);
 //        horizontalImageList.setClickable(true);
+
+        TextView textNomeUser = root.findViewById(R.id.textNomeUser);
+        TextView textEmailUser = root.findViewById(R.id.textEmailUser);
+        if (getActivity() != null) {
+            Intent intent = getActivity().getIntent();
+            if (intent != null && intent.hasExtra("USERNAME_KEY")) {
+                String username = intent.getStringExtra("USERNAME_KEY");
+                String email = intent.getStringExtra("EMAIL_KEY");
+                textNomeUser.setText(username);
+                textEmailUser.setText(email);
+            }
+        }
 
         final TextView textView = binding.textNotification;
         notificationsViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);

@@ -78,20 +78,20 @@ public class HomeFragment extends Fragment {
         filterImageView = root.findViewById(R.id.filter);
 
 
-        ArrayList<ListData> dataArrayList = new ArrayList<>();
-        int[] imageList = new int[]{R.drawable.bed, R.drawable.bed, R.drawable.bed};
-        String[] nameList = new String[]{"Bed", "Chair", "Bed"};
-        String[] sizeList = new String[]{"30*40*50", "30*40*50", "30*40*50"};
-        Boolean[] starList = new Boolean[]{false, false, true};
-
-        for (int i = 0; i < imageList.length; i++) {
-            listData = new ListData(nameList[i], sizeList[i], imageList[i],starList[i]);
-            dataArrayList.add(listData);
-        }
+//        ArrayList<ListData> dataArrayList = new ArrayList<>();
+//        int[] imageList = new int[]{R.drawable.bed, R.drawable.bed, R.drawable.bed};
+//        String[] nameList = new String[]{"Bed", "Chair", "Bed"};
+//        String[] sizeList = new String[]{"30*40*50", "30*40*50", "30*40*50"};
+//        Boolean[] starList = new Boolean[]{false, false, true};
+//
+//        for (int i = 0; i < imageList.length; i++) {
+//            listData = new ListData(nameList[i], sizeList[i], imageList[i],starList[i]);
+//            dataArrayList.add(listData);
+//        }
 
 //        dataItems = dataArrayList;
-        listAdapter = new ListAdapter(requireContext(), dataArrayList);
-        binding.listView.setAdapter(listAdapter);
+//        listAdapter = new ListAdapter(requireContext(), dataArrayList);
+//        binding.listView.setAdapter(listAdapter);
 
 
 

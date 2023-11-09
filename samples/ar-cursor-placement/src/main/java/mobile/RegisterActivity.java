@@ -3,11 +3,13 @@ package mobile;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -23,6 +25,7 @@ import java.io.UnsupportedEncodingException;
 
 import io.github.sceneview.sample.arcursorplacement.R;
 import mobile.MainActivity;
+import mobile.RegisterActivity;
 
 public class RegisterActivity extends AppCompatActivity {
     String email;
@@ -34,6 +37,8 @@ public class RegisterActivity extends AppCompatActivity {
     private EditText nameEditText;
     private Button signUpButton;
     private ProgressBar progressBar;
+
+    TextView registrationStatusText;
 
     private String params = "";
 
@@ -110,22 +115,13 @@ public class RegisterActivity extends AppCompatActivity {
         }
     }
 
-    private void requestRegistration(String email, String password, String name) {
-        RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
-        String url = "https://mobiles-2a62216dada4.herokuapp.com/user/register"; // Replace with your actual backend URL
-
+    private void requestRegistration(String email, String password,String username) {
+        // Instantiate the RequestQueue.
+        RequestQueue queue = Volley.newRequestQueue(RegisterActivity.this);
+        String url = "https://mobiles-2a62216dada4.herokuapp.com/user/register";
+        registrationStatusText = findViewById(R.id.registration_status_text);
         StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
                 new Response.Listener<String>() {
-//                    @Override
-//                    public void onResponse(String response) {
-//                        Log.e("requestTest", "Registration Response: " + response);
-//
-//                        // Handle the registration response as needed
-//                        progressBar.setVisibility(View.INVISIBLE);
-//                        Toast.makeText(RegisterActivity.this, "Registration Successful", Toast.LENGTH_SHORT).show();
-//                        finish(); // Close the SignUpActivity after successful registration
-//                    }
-//                },
                     @Override
                     public void onResponse(String response) {
                         // response
@@ -133,12 +129,22 @@ public class RegisterActivity extends AppCompatActivity {
 
                         try {
                             JSONObject jsonObject = new JSONObject(response);
-                            String login = jsonObject.getString("login");
-                            String password= jsonObject.getString("password");
-                            String username= jsonObject.getString("username");
+                            String successful = jsonObject.getString("successful");
 
-                            Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
-                            startActivity(intent);
+                            if(successful.equals("true")) {
+                                registrationStatusText.setText("Registration successful!");
+                                new Handler().postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
+                                        startActivity(intent);
+                                        finish(); // Optional, depending on your navigation flow
+                                    }
+                                }, 3000); // 3000 milliseconds = 3 seconds
+
+                            }else{
+                                registrationStatusText.setText(successful);
+                            }
 
                         } catch (JSONException ex) {
                             throw new RuntimeException(ex);
@@ -148,55 +154,34 @@ public class RegisterActivity extends AppCompatActivity {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Log.e("requestTest", "Registration Error: " + error.getMessage());
-                        progressBar.setVisibility(View.INVISIBLE);
-                        // Handle registration error
-                        Toast.makeText(RegisterActivity.this, "Registration Error", Toast.LENGTH_SHORT).show();
+                        Log.e("requestTest", "Error: " + error.getMessage());
+                        // deal with error response
                     }
-                }) {
-//            @Override
-//            public byte[] getBody() {
-//                try {
-//                    return params.getBytes("utf-8");
-//                } catch (UnsupportedEncodingException e) {
-//                    e.printStackTrace();
-//                    return null;
-//                }
-//            }
-//
-//            @Override
-//            public String getBodyContentType() {
-//                return "application/json; charset=utf-8";
-//            }
-//        };
-//
-//        queue.add(stringRequest);
-//    }
-//}
-        @Override
-        public byte[] getBody() {
+                })  {
+            @Override
+            public byte[] getBody() {
 
-            JSONObject params = new JSONObject();
-            try {
-                params.put("email", email);
-                params.put("password", password);
-                params.put("name", name);
-                Log.e("requestTest", "message: " + params);
-            } catch (JSONException e) {
-                e.printStackTrace();
+                JSONObject params = new JSONObject();
+                try {
+                    params.put("email", email);
+                    params.put("password", password);
+                    params.put("username", username);
+                    Log.e("requestTest", "message: " + params);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                return params.toString().getBytes();
+            }
+            @Override
+            public String getBodyContentType() {
+                return "application/json; charset=utf-8";
             }
 
-            return params.toString().getBytes();
-        }
-                    @Override
-                    public String getBodyContentType() {
-                        return "application/json; charset=utf-8";
-                    }
+        };
 
-                };
-
-                // add to queue
-                queue.add(stringRequest);
-            }
+        // add to queue
+        queue.add(stringRequest);
+    }
         }
 

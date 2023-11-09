@@ -42,6 +42,12 @@ public class LoginActivity extends AppCompatActivity {
 
     String email;
 
+    String login;
+
+    String username;
+
+    TextView loginStatusText;
+
     String password;
     private TextView forgotPasswordTextView;
     private ProgressDialog mDialog; // Add this line for ProgressDialog
@@ -176,14 +182,21 @@ public class LoginActivity extends AppCompatActivity {
                     public void onResponse(String response) {
                         // response
 
-
+                        loginStatusText = findViewById(R.id.login_status_text);
                         try {
                             JSONObject jsonObject = new JSONObject(response);
-                            String login = jsonObject.getString("login");
-                            String username= jsonObject.getString("username");
+                            login = jsonObject.getString("login");
+                            username= jsonObject.getString("username");
+                            Log.e("requestTest", "Error: " + response);
+                            if(login.equals("true")){
+                                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
 
-                            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                            startActivity(intent);
+                                intent.putExtra("USERNAME_KEY", username);
+                                intent.putExtra("EMAIL_KEY", email);
+                                startActivity(intent);
+                            }else{
+                                loginStatusText.setText(login);
+                            }
 
                         } catch (JSONException ex) {
                             throw new RuntimeException(ex);
@@ -220,6 +233,7 @@ public class LoginActivity extends AppCompatActivity {
 
         // add to queue
         queue.add(stringRequest);
+
     }
 }
 
