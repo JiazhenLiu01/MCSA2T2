@@ -23,6 +23,9 @@ import java.io.UnsupportedEncodingException;
 import io.github.sceneview.sample.arcursorplacement.R;
 
 public class RegisterActivity extends AppCompatActivity {
+    String email;
+    String password;
+    String name;
 
     private EditText emailEditText;
     private EditText passwordEditText;
@@ -46,9 +49,9 @@ public class RegisterActivity extends AppCompatActivity {
         signUpButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String email = emailEditText.getText().toString();
-                String password = passwordEditText.getText().toString();
-                String name = nameEditText.getText().toString();
+                email = emailEditText.getText().toString();
+                password = passwordEditText.getText().toString();
+                name = nameEditText.getText().toString();
 
                 if (isValid(email, password, name)) {
                     signUp(email, password, name);
