@@ -1,5 +1,6 @@
 package mobile.ui.login_signup;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -28,7 +29,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import io.github.sceneview.sample.arcursorplacement.Activity;
 import io.github.sceneview.sample.arcursorplacement.R;
+import mobile.MainActivity;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -178,7 +181,8 @@ public class LoginActivity extends AppCompatActivity {
                            String login = jsonObject.getString("login");
                            String username= jsonObject.getString("username");
 
-                            Log.e("requestTest", "login: " + login+"username"+username);
+                            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                            startActivity(intent);
 
                         } catch (JSONException ex) {
                             throw new RuntimeException(ex);
