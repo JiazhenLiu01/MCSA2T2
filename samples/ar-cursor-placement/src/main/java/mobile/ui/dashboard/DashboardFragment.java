@@ -74,6 +74,8 @@ public class DashboardFragment extends Fragment implements
 
     ListAdapter listAdapter;
 
+
+
     ArrayList<ArrayList<ListData>> markerInfo= new ArrayList<ArrayList<ListData>>();
 
 
