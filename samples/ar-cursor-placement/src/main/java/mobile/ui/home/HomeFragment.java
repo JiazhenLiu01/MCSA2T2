@@ -30,10 +30,8 @@ import com.android.volley.toolbox.Volley;
 import io.github.sceneview.sample.arcursorplacement.Activity;
 import io.github.sceneview.sample.arcursorplacement.R;
 import io.github.sceneview.sample.arcursorplacement.databinding.FragmentHomeBinding;
-import mobile.MainActivity;
 import mobile.ui.SharedViewModel;
 
-import org.apache.tools.ant.Main;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -42,10 +40,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Stack;
 
 
 public class HomeFragment extends Fragment {

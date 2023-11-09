@@ -15,13 +15,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import io.github.sceneview.sample.arcursorplacement.R;
 import io.github.sceneview.sample.arcursorplacement.databinding.FragmentNotificationsBinding;
 import mobile.ui.SharedViewModel;
-import mobile.ui.notifications.ImageListAdapter;
-import mobile.ui.notifications.ListData;
 
 public class NotificationsFragment extends Fragment {
 
