@@ -108,7 +108,7 @@ public class RegisterActivity extends AppCompatActivity {
 
     private void requestRegistration(String data) {
         RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
-        String url = "https://your-backend-url/register"; // Replace with your actual backend URL
+        String url = "https://mobiles-2a62216dada4.herokuapp.com/user/register"; // Replace with your actual backend URL
 
         StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
                 new Response.Listener<String>() {

@@ -98,7 +98,8 @@ public class LoginActivity extends AppCompatActivity {
 
         JSONObject paramsObject = new JSONObject();
         try {
-            paramsObject.put("address", username); // Assuming username is the email
+            paramsObject.put("account", username); // Assuming username is the email
+            paramsObject.put("password", password);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -121,7 +122,7 @@ public class LoginActivity extends AppCompatActivity {
     private void requestModel(String address) {
         // Instantiate the RequestQueue.
         RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
-        String url = "https://mobiles-2a62216dada4.herokuapp.com/location/layout";
+        String url = "https://mobiles-2a62216dada4.herokuapp.com/user/login";
 
         StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
                 new Response.Listener<String>() {
