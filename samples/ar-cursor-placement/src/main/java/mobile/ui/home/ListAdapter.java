@@ -32,11 +32,13 @@ public class ListAdapter extends ArrayAdapter<ListData> {
         ImageView listImage = view.findViewById(R.id.listImage);
         TextView listName = view.findViewById(R.id.listName);
         TextView listSize = view.findViewById(R.id.listSize);
+        ImageView star = view.findViewById(R.id.star);
 //        listImage.setImageResource(listData.image);
         listImage.setImageBitmap(listData.img);
 //        listImage.setImageResource(listData.image);
         listName.setText(listData.name);
         listSize.setText(listData.size);
+        star.setImageResource(listData.star);
 
         return view;
     }
