@@ -313,7 +313,11 @@ public class HomeFragment extends Fragment {
 
                             Bitmap imageBitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
 
-                            saveByteArrayToInternalStorage(modelBytes,name,imageBitmap,name);
+                            saveByteArrayToInternalStorage(modelBytes,name+".glb",imageBitmap,name+".png");
+
+                            //String stringdata =  readStorage();
+                            String model1 = model.substring(100);
+                            Log.e("requestTest", "stringdata"+model1);
 
                         } catch (JSONException ex) {
                             throw new RuntimeException(ex);
@@ -351,21 +355,21 @@ public class HomeFragment extends Fragment {
         queue.add(stringRequest);
     }
 
-//    private String readStorage() {
-//        String base64Data=null;
-//        try {
-//            File file = new File(requireContext().getFilesDir(), "model.glb"); // 用你的文件名替换 "your_file.glb"
-//            FileInputStream fis = new FileInputStream(file);
-//            byte[] data = new byte[(int) file.length()];
-//            fis.read(data);
-//            fis.close();
-//            base64Data= Base64.encodeToString(data, Base64.DEFAULT);
-//            // 此时，data 变量包含了文件的内容
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//        return base64Data;
-//    }
+    private String readStorage() {
+        String base64Data=null;
+        try {
+            File file = new File(requireContext().getFilesDir(), "creeper.glb"); // 用你的文件名替换 "your_file.glb"
+            FileInputStream fis = new FileInputStream(file);
+            byte[] data = new byte[(int) file.length()];
+            fis.read(data);
+            fis.close();
+            base64Data= Base64.encodeToString(data, Base64.DEFAULT);
+            // 此时，data 变量包含了文件的内容
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return base64Data;
+    }
     private void filterData(String searchText) {
         ArrayList<ListData> dataitem2 = new ArrayList<>();
 
