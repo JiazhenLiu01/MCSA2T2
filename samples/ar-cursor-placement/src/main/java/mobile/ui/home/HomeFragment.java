@@ -308,14 +308,13 @@ public class HomeFragment extends Fragment {
                             String model = jsonObject.getString("model");
                             String image = jsonObject.getString("image");
 
-                            byte[] modelBytes = model.getBytes(StandardCharsets.UTF_8);
-                            byte[] imageBytes = Base64.decode(image, Base64.DEFAULT);
+                            byte[] decodeImage = Base64.decode(image, Base64.DEFAULT);
+                            Bitmap bitmap = BitmapFactory.decodeByteArray(decodeImage, 0, decodeImage.length);
+                            byte[] glbData = Base64.decode(model, Base64.DEFAULT);
 
-                            Bitmap imageBitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+                            saveByteArrayToInternalStorage(glbData,name+".glb",bitmap,name+".png");
 
-                            saveByteArrayToInternalStorage(modelBytes,name+".glb",imageBitmap,name+".png");
 
-                            //String stringdata =  readStorage();
                             String model1 = model.substring(100);
                             Log.e("requestTest", "stringdata"+model1);
 
