@@ -101,7 +101,7 @@ public class LoginActivity extends AppCompatActivity {
         mDialog = new ProgressDialog(LoginActivity.this);
         mDialog.setTitle("Login...");
         mDialog.setMessage("Waiting...");
-        mDialog.setCancelable(false);
+        mDialog.setCancelable(true);
         mDialog.show();
 
         JSONObject paramsObject = new JSONObject();
@@ -181,7 +181,7 @@ public class LoginActivity extends AppCompatActivity {
                     @Override
                     public void onResponse(String response) {
                         // response
-
+                        mDialog.dismiss();
                         loginStatusText = findViewById(R.id.login_status_text);
                         try {
                             JSONObject jsonObject = new JSONObject(response);
