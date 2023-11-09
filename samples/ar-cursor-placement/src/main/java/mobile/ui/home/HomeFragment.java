@@ -68,18 +68,18 @@ public class HomeFragment extends Fragment {
 
 
 
-//        ArrayList<ListData> dataArrayList = new ArrayList<>();
-//        int[] imageList = new int[]{R.drawable.bed, R.drawable.bed, R.drawable.bed};
-//        String[] nameList = new String[]{"Bed", "Bed", "Bed"};
-//        String[] sizeList = new String[]{"30*40*50", "30*40*50", "30*40*50"};
-//        Boolean[] starList = new Boolean[]{false, false, true};
-//
-//        for (int i = 0; i < imageList.length; i++) {
-//            listData = new ListData(nameList[i], sizeList[i], imageList[i],starList[i]);
-//            dataArrayList.add(listData);
-//        }
-//        listAdapter = new ListAdapter(requireContext(), dataArrayList);
-//        binding.listView.setAdapter(listAdapter);
+        ArrayList<ListData> dataArrayList = new ArrayList<>();
+        int[] imageList = new int[]{R.drawable.bed, R.drawable.bed, R.drawable.bed};
+        String[] nameList = new String[]{"Bed", "Bed", "Bed"};
+        String[] sizeList = new String[]{"30*40*50", "30*40*50", "30*40*50"};
+        Boolean[] starList = new Boolean[]{false, false, true};
+
+        for (int i = 0; i < imageList.length; i++) {
+            listData = new ListData(nameList[i], sizeList[i], imageList[i],starList[i]);
+            dataArrayList.add(listData);
+        }
+        listAdapter = new ListAdapter(requireContext(), dataArrayList);
+        binding.listView.setAdapter(listAdapter);
 
 
 
@@ -95,6 +95,9 @@ public class HomeFragment extends Fragment {
 //                startActivity(intent);
                   downloadFurnitureRequest(dataItems.get(i).name);
                   dataItems.get(i).setStar(true);
+                  ListAdapter adapter = new ListAdapter(requireContext(), dataItems);
+                    // assign the adapter to the recycler view
+                    binding.listView.setAdapter(adapter);
             }
         });
 
