@@ -343,9 +343,10 @@ public class DashboardFragment extends Fragment implements
                         try {
                             JSONArray jsonArray = new JSONArray(response);
                             for (int i = 0; i < jsonArray.length(); i++) {
+
                                 ArrayList<ListData> dataItems = new ArrayList<>();
                                 JSONObject data = jsonArray.getJSONObject(i);
-
+                                Log.e("jsonT", "i: " + data.toString());
                                 double latitude = data.getDouble("latitude");
                                 double longitude = data.getDouble("longitude");
                                 int number=data.getInt("number");
@@ -353,6 +354,7 @@ public class DashboardFragment extends Fragment implements
                                 JSONArray propertiesArray = data.getJSONArray("properties");
                                 for (int j = 0; j < propertiesArray.length(); j++) {
                                     JSONObject property = propertiesArray.getJSONObject(j);
+                                    Log.e("jsonT", "j: " + property.toString());
                                     String address = property.getString("address");
                                     String id = property.getString("id");
                                     String imgB64 = property.getString("image");

@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.location.Geocoder
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -52,6 +53,8 @@ import io.github.sceneview.utils.Color
 import kotlinx.coroutines.delay
 import okhttp3.OkHttpClient
 import java.io.File
+import java.io.IOException
+import java.util.Locale
 
 
 lateinit var newVector: Vector3
@@ -571,7 +574,7 @@ class MainFragment : Fragment(R.layout.fragment_main), OnModelClickListener {
         placeBtn.isVisible=false
 
         getLocation(object : LocationCallback {
-            override fun onLocationResult(latitude: Double, longitude: Double, altitude: Double) {
+            override fun onLocationResult(latitude: Double, longitude: Double, altitude: Double,address:String) {
                 val layoutPositions = anchors.map { anchor ->
                     val pose = anchor.pose
                     AnchorData(pose.tx(), pose.ty(), pose.tz())
@@ -587,12 +590,14 @@ class MainFragment : Fragment(R.layout.fragment_main), OnModelClickListener {
                         it.model.fileLocation
                     )
                 }
+                var address1= address.split(",").first()
                 val data = mapOf(
                     "layoutPositions" to layoutPositions,
                     "modelsPositions" to modelsPositions,
                     "latitude" to latitude,
                     "longitude" to longitude,
-                    "altitude" to altitude
+                    "altitude" to altitude,
+                    "address" to address1
                 )
                 val dataJson = gson.toJson(data)
                 webView.evaluateJavascript(
@@ -600,6 +605,7 @@ class MainFragment : Fragment(R.layout.fragment_main), OnModelClickListener {
                     null
                 )
                 Log.e("doneAndGenerate", "data send")
+                Toast.makeText(requireContext(), "Model generating", Toast.LENGTH_SHORT).show();
                 isLoading = true
 
 //                sleep(3000)
@@ -682,15 +688,31 @@ class MainFragment : Fragment(R.layout.fragment_main), OnModelClickListener {
                 if (location != null) {
                     val latitude = location.latitude
                     val longitude = location.longitude
+                    val address = getAddressFromLocation(latitude, longitude)
+                    Log.e("address", address)
                     val altitude = location.altitude
-                    callback.onLocationResult(latitude, longitude, altitude)
+                    callback.onLocationResult(latitude, longitude, altitude,address)
                 } else {
                     callback.onLocationUnavailable()
                 }
             }
         }
     }
+    private fun getAddressFromLocation(latitude: Double, longitude: Double): String {
+        val geocoder = Geocoder(requireContext(), Locale.getDefault())
+        return try {
+            val addresses = geocoder.getFromLocation(latitude, longitude, 1)
+            if (addresses?.isNotEmpty() == true) {
+                addresses[0].getAddressLine(0) // You might want to adjust this, depending on the address details you need.
 
+            } else {
+                "No address found"
+            }
+        } catch (e: IOException) {
+            e.printStackTrace()
+            "Unable to get address"
+        }
+    }
     @SuppressLint("SetJavaScriptEnabled")
     private fun setupWebView() {
         val webSettings: WebSettings = webView.settings
