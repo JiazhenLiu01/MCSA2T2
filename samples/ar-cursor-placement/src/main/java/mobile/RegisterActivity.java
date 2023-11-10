@@ -62,6 +62,7 @@ public class RegisterActivity extends AppCompatActivity {
 
                 if (isValid(email, password, name)) {
                     signUp(email, password, name);
+                    Log.e("requestTest", "message: " + email +" "+ password+" " + name);
                 } else {
                     Toast.makeText(RegisterActivity.this, "Invalid details", Toast.LENGTH_SHORT).show();
                 }
@@ -76,6 +77,7 @@ public class RegisterActivity extends AppCompatActivity {
     private boolean isValidEmail(String email) {
         // Use a more restrictive regex pattern for email validation
         String emailPattern = "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}";
+        Log.e("requestTest", "message: " + email.matches(emailPattern));
         return !email.isEmpty() && email.matches(emailPattern);
     }
 
@@ -140,7 +142,7 @@ public class RegisterActivity extends AppCompatActivity {
                                         startActivity(intent);
                                         finish(); // Optional, depending on your navigation flow
                                     }
-                                }, 3000); // 3000 milliseconds = 3 seconds
+                                }, 1000); // 3000 milliseconds = 3 seconds
 
                             }else{
                                 registrationStatusText.setText(successful);

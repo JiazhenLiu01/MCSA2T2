@@ -60,6 +60,8 @@ public class HomeFragment extends Fragment {
 
     ImageView filterImageView;
 
+    ArrayList<ListData> dataItem2;
+
 
 
     boolean firstGet = true;
@@ -104,14 +106,24 @@ public class HomeFragment extends Fragment {
             //            @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 
-                  downloadFurnitureRequest(dataItems.get(i).name);
-                  dataItems.get(i).setStar(true);
-                  ListAdapter adapter = new ListAdapter(requireContext(), dataItems);
+                  downloadFurnitureRequest(dataItem2.get(i).name);
+                  dataItem2.get(i).setStar(true);
+                for(ListData item3 : nameStar){
+                    if(dataItem2.get(i).name.equals(item3.name))
+                        item3.setStar(true);
+                }
+
+                for(ListData item3 : dataItems){
+                    if(dataItem2.get(i).name.equals(item3.name))
+                        item3.setStar(true);
+                }
+//                    nameStar.get(i).setStar(true);
+                  ListAdapter adapter = new ListAdapter(requireContext(), dataItem2);
                     // assign the adapter to the recycler view
                     binding.listView.setAdapter(adapter);
 
-                    String name =dataItems.get(i).name;
-                    Bitmap imge =dataItems.get(i).img;
+                    String name =dataItem2.get(i).name;
+                    Bitmap imge =dataItem2.get(i).img;
 
                     SharedViewModel sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
                     // Set the selected item
@@ -176,6 +188,7 @@ public class HomeFragment extends Fragment {
                                 Log.e("requestTest", response.toString());
                                 try {
                                     dataItems = new ArrayList<>();
+                                    dataItem2 = new ArrayList<>();
                                     Log.e("requestTest", "before-pass");
                                     for (int i = 0; i < response.length(); i++) {
                                         JSONObject itemObj = response.getJSONObject(i);
@@ -196,17 +209,20 @@ public class HomeFragment extends Fragment {
                                         ListData modelItem = new ListData(name, bitmap,size,false);
 //                                        ListData modelItem = new ListData(name,"2",0);
                                         dataItems.add(modelItem);
+                                        dataItem2.add(modelItem);
                                         if (firstGet) {
                                             nameStar.add(modelItem);
-                                            firstGet=false;
                                         }else{
                                             dataItems.get(i).star=nameStar.get(i).star;
+                                            dataItem2.get(i).star=nameStar.get(i).star;
                                         }
+
                                         Log.e("requestTest", "pass");
                                     }
+                                    firstGet=false;
                                     Log.e("requestTest", String.valueOf(response.length()));
                                     // Now: all the data items are in the array list, send it to the recycler adapter to create views.
-                                    ListAdapter adapter = new ListAdapter(requireContext(), dataItems);
+                                    ListAdapter adapter = new ListAdapter(requireContext(), dataItem2);
                                     // assign the adapter to the recycler view
                                     binding.listView.setAdapter(adapter);
                                 } catch (Exception e) {
@@ -378,7 +394,7 @@ public class HomeFragment extends Fragment {
         return base64Data;
     }
     private void filterData(String searchText) {
-        ArrayList<ListData> dataItem2 = new ArrayList<>();
+        dataItem2 = new ArrayList<>();
         if (searchText!=null)
             filterImageView.setVisibility(View.VISIBLE);
         for (ListData item : dataItems) {

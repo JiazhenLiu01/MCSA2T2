@@ -239,11 +239,11 @@ class MainFragment : Fragment(R.layout.fragment_main), OnModelClickListener {
                         "x: ${it[0]}, y: ${it[1]}, z: ${it[2]}"
                     }
                     // Display Toast with record count and position
-                    Toast.makeText(
-                        context,
-                        "Record count: $recordCount at position $position",
-                        Toast.LENGTH_SHORT
-                    ).show()
+//                    Toast.makeText(
+//                        context,
+//                        "Record count: $recordCount at position $position",
+//                        Toast.LENGTH_SHORT
+//                    ).show()
                     Log.e("pos:", position)
                     Log.e("anchors", anchors.toString())
                 }

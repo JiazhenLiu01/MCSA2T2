@@ -11,6 +11,8 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import io.github.sceneview.sample.arcursorplacement.R
 import android.Manifest
+import android.widget.Toast
+
 class ViewFragment : Fragment(R.layout.viewmodel) {
     private lateinit var webView: WebView
     private lateinit var webAppInterface: WebAppInterface
@@ -54,6 +56,7 @@ class ViewFragment : Fragment(R.layout.viewmodel) {
         }
         // Load the URL of the HTML page that contains the Three.js scene
         webView.loadUrl("file:///android_asset/modelView.html")
+        Toast.makeText(requireContext(), "Loading Model", Toast.LENGTH_SHORT).show()
     }
 
     private fun setupWebView() {

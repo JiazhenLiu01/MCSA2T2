@@ -13,8 +13,8 @@
 <script type="module">
     import * as THREE from 'https://cdn.skypack.dev/three@0.130.0/src/Three.js';
     import { GLTFLoader } from 'https://cdn.skypack.dev/three@0.130.0/examples/jsm/loaders/GLTFLoader.js';
-
-    let camera, scene, renderer, model;
+    import { OrbitControls } from 'https://cdn.skypack.dev/three@0.130.0/examples/jsm/controls/OrbitControls.js';
+    let camera, scene, renderer, model, orbitControls;
 
     init();
     animate();
@@ -34,6 +34,18 @@
         scene.add(ambientLight);
         const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
         scene.add(directionalLight);
+        const skyColor = 0x87CEEB; // hexadecimal color for sky blue
+        // groundColor is a darker grey, representing shadowed areas
+        const groundColor = 0x97A1A1; // hexadecimal color for a grey
+        const intensity = 0.5; // the light's intensity
+        const hemisphereLight = new THREE.HemisphereLight(skyColor, groundColor, intensity);
+        scene.add(hemisphereLight);
+
+        // Instantiate OrbitControls
+        orbitControls = new OrbitControls(camera, renderer.domElement);
+        orbitControls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
+        orbitControls.dampingFactor = 0.25;
+        orbitControls.screenSpacePanning = false;
     }
 
     function animate() {
@@ -44,6 +56,7 @@
             model.rotation.y = modelRotation.y;
             model.rotation.z = modelRotation.z;
         }
+        orbitControls.update();
         renderer.render(scene, camera);
     }
 

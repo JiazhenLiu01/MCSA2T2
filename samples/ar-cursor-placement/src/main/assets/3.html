@@ -3,87 +3,206 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Three.js Scene</title>
+
     <style>
         body { margin: 0; }
-        canvas { width: 100%; height: 100% }
+        canvas { display: block; }
+
     </style>
 </head>
 <body>
 <script type="module">
-    import * as THREE from 'https://cdn.skypack.dev/three';
-    import { OrbitControls } from 'https://cdn.skypack.dev/three/examples/jsm/controls/OrbitControls.js';
-    import { GLTFLoader } from 'https://cdn.skypack.dev/three/examples/jsm/loaders/GLTFLoader.js';
+    import * as THREE from 'https://cdn.skypack.dev/three@0.134.0/src/Three.js';
+    import { OrbitControls } from 'https://cdn.skypack.dev/three@0.134.0/examples/jsm/controls/OrbitControls.js';
+    import Stats from 'https://cdn.skypack.dev/three@0.134.0/examples/jsm/libs/stats.module.js';
+    import { GLTFLoader } from "https://cdn.skypack.dev/three@0.134.0/examples/jsm/loaders/GLTFLoader.js";
+    import { GLTFExporter } from 'https://cdn.skypack.dev/three@0.134.0/examples/jsm/exporters/GLTFExporter.js';
 
-    let camera, scene, renderer, orbitControls, model;
+    var dataAll=null;
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
 
-    init();
-    animate();
-    setupEventListeners();
+    const controls = new OrbitControls(camera, renderer.domElement);
+    const ambientLight = new THREE.AmbientLight(0x404040);
+    scene.add(ambientLight);
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+    directionalLight.position.set(1, 1, 1).normalize();
+    scene.add(directionalLight);
+    camera.position.set(0, 0, 3);
+    controls.update();
 
-    function init() {
-        scene = new THREE.Scene();
-        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(renderer.domElement);
 
-        camera.position.set(0, 0, 5);
-        camera.lookAt(scene.position);
+    const layoutMesh = createLayoutMesh([]);
+    scene.add(layoutMesh);
 
-        // Lights
-        const ambientLight = new THREE.AmbientLight(0x404040);
-        scene.add(ambientLight);
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-        scene.add(directionalLight);
+    console.log("base init");
+    window.AndroidInterfaceT = {
+        receiveAnchorsData: function (anchorsJson) {
+            const anchorsList = JSON.parse(anchorsJson);
+            console.log("anchor",anchorsList);
+            updateLayoutMesh(anchorsList);
+        },
+        receiveModelPlacementData: function (modelPlacementJson) {
+            const modelPlacementList = JSON.parse(modelPlacementJson);
+            console.log("model",modelPlacementList);
+            placeModel(modelPlacementList);
+        },
+        receiveData: function (dataJson) {
+            const data = JSON.parse(dataJson);
+            dataAll=data;
+            console.log("anchor",data);
+            updateLayoutMesh(data.layoutPositions);
+            placeModel(data.modelsPositions);
+        }
 
-        // OrbitControls for touch interaction
-        orbitControls = new OrbitControls(camera, renderer.domElement);
-        orbitControls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
-        orbitControls.dampingFactor = 0.25;
+    };
+
+    function updateLayoutMesh(anchorsList) {
+        const layoutPositions = anchorsList.map(anchor => new THREE.Vector3(anchor.x, anchor.y, anchor.z));
+
+        const layoutCentroid = layoutPositions.reduce((sum, pos) => sum.add(pos), new THREE.Vector3()).divideScalar(layoutPositions.length);
+        console.log("layoutmesh loc",layoutPositions);
+        layoutCentroid.y -= 0.1;
+        layoutPositions.forEach((item, index, arr) => {
+            arr[index].sub(layoutCentroid);
+        });
+        const layoutShape = new THREE.Shape();
+        layoutShape.moveTo(layoutPositions[0].x, layoutPositions[0].z);
+        for (let i = 1; i < layoutPositions.length; i++) {
+            layoutShape.lineTo(layoutPositions[i].x, layoutPositions[i].z);
+        }
+        layoutShape.lineTo(layoutPositions[0].x, layoutPositions[0].z);
+        const layoutExtrudeSettings = {
+            steps: 1,
+            depth: 0.10,
+            bevelEnabled: false
+        };
+        const layoutGeometry = new THREE.ExtrudeGeometry(layoutShape, layoutExtrudeSettings);
+        layoutMesh.geometry.dispose();
+        layoutMesh.geometry = layoutGeometry;
+        layoutMesh.position.set(layoutCentroid.x, layoutCentroid.y, layoutCentroid.z);
+        layoutMesh.rotation.x = Math.PI / 2;
+
     }
+
+    function placeModel(modelPlacementList) {
+        // Create an array to hold all the load promises
+        const loadPromises = modelPlacementList.map(placement => {
+            // Return a new Promise for each model load
+            return new Promise((resolve, reject) => {
+                const fileLocation = placement.fileLocation;
+                const fileNameWithSuffix = fileLocation.split("models/").pop();
+                const uri = 'https://appassets.androidplatform.net/files/models/' + fileNameWithSuffix;
+                const modelLoader = new GLTFLoader();
+                modelLoader.load(uri, (gltf) => {
+                    const model = gltf.scene;
+                    model.scale.set(placement.scale.x, placement.scale.y, placement.scale.z);
+                    model.position.set(placement.x, placement.y, placement.z);
+                    model.rotation.y = placement.rotation;
+                    scene.add(model);
+                    resolve(model); // Resolve the promise once the model is loaded
+                }, undefined, reject); // Reject the promise on error
+            });
+        });
+
+        // Use Promise.all to wait for all models to load before continuing
+        Promise.all(loadPromises).then(() => {
+            console.log('All models loaded, now animating and exporting the scene.');
+            animate(); // Start the animation loop once all models are loaded
+            exportScene(); // Call the exportScene function
+        }).catch(error => {
+            console.error('Error loading a model: ', error);
+        });
+    }
+
+
+    function createLayoutMesh(anchorsList) {
+        const layoutGeometry = new THREE.BufferGeometry();
+        const layoutMaterial = new THREE.MeshBasicMaterial({ color: 0x808080, wireframe: false });
+        return new THREE.Mesh(layoutGeometry, layoutMaterial);
+    }
+
 
     function animate() {
         requestAnimationFrame(animate);
-        orbitControls.update(); // only required if controls.enableDamping = true, or if controls.autoRotate = true
+        controls.update();
         renderer.render(scene, camera);
     }
 
-    function setupEventListeners() {
-        window.addEventListener('resize', onWindowResize, false);
-        window.addEventListener('deviceorientation', (event) => {
-            // Device orientation logic (if you want to implement)
-        }, true);
+
+
+
+
+
+
+    function exportScene() {
+        const exporter = new GLTFExporter();
+        exporter.parse(scene, function (glb) {
+            // Convert GLB to Blob
+            const blob = new Blob([glb], { type: 'model/gltf-binary' });
+
+            // Read the blob as a Base64 string
+            const reader = new FileReader();
+            reader.onloadend = function () {
+                // Get the Base64 encoded string
+                const base64data = reader.result;
+
+                // Create a JSON object with all data
+                const sceneData = {
+
+                    longitude: dataAll.longitude,
+                    latitude: dataAll.latitude,
+                    address: '228 Abeckteet st',
+                    unit: Math.floor(1000 + Math.random() * 9000).toString(),
+                    file: base64data
+                };
+
+                // Convert the JSON object to a JSON string
+                const jsonString = JSON.stringify(sceneData);
+                console.log(jsonString);
+                // Send the JSON string with fetch to your server endpoint
+
+                fetch('https://mobiles-2a62216dada4.herokuapp.com/location/layout/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: jsonString
+                })
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        throw new Error('Network response was not ok.');
+                    }
+                })
+                .then(data => {
+                    console.log('Success:', data);
+                    console.log(data.modelID);
+                    if (typeof AndroidInterface.closeWebViewT === 'function') {
+                        console.log("close");
+                        AndroidInterface.closeWebViewT(data.modelID);
+                    } else {
+                        console.error('closeWebView function is not available on AndroidInterface.');
+                    }
+
+                })
+                .catch((error) => {
+                    console.error('Error:', error.message);
+                });
+            };
+
+            // Read the blob as a data URL
+            reader.readAsDataURL(blob);
+        }, { binary: true });
     }
 
-    function onWindowResize() {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-    }
 
-    // Function to load the model using a model ID
-    window.loadModelFromId = (modelId) => {
-        fetch(`https://mobiles-2a62216dada4.herokuapp.com/location/layout/get/${modelId}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data && data.model) {
-                    const modelDataUri = data.model;
-                    const modelLoader = new GLTFLoader();
-                    modelLoader.load(modelDataUri, (gltf) => {
-                        model = gltf.scene; // Assign the loaded model to the model variable
-                        scene.add(model); // Add the model to the scene
-                    }, undefined, (error) => {
-                        console.error('An error occurred while loading the model:', error);
-                    });
-                } else {
-                    throw new Error('Model data not found in the response.');
-                }
-            })
-            .catch((error) => {
-                console.error('Error fetching model data:', error);
-            });
-    };
+
 </script>
+
 </body>
 </html>
